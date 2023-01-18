@@ -1,5 +1,3 @@
-module go-exercise/hello
+module github.com/Eric-lab-star/go-exercise/hello
 
 go 1.19
-
-require golang.org/x/net v0.5.0 
