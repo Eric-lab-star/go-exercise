@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/Eric-lab-star/go-exercise/link"
@@ -36,7 +37,7 @@ func get(urlFlag string) []string {
 		Host:   reqURL.Host,
 	}
 
-	return filter(baseURL.String(), hrefs(res.Body, baseURL))
+	return filterAll(hrefs(res.Body, baseURL), withNumber(100), withNumber(90))
 }
 
 // hrefs parse response body and return href
@@ -56,13 +57,47 @@ func hrefs(r io.Reader, baseURL *url.URL) []string {
 	return ret
 }
 
-func filter(base string, hrefs []string) []string {
+func filter(hrefs []string, keepFn func(string) bool) []string {
 	var ret []string
+
 	for _, href := range hrefs {
-		switch {
-		case strings.HasPrefix(href, base):
+		if keepFn(href) {
 			ret = append(ret, href)
 		}
+
 	}
 	return ret
+}
+
+func filterAll(hrefs []string, keepFns ...func(string) bool) []string {
+	var ret []string
+
+	for i := 0; i < len(keepFns); i++ {
+		if i == 0 {
+			ret = filter(hrefs, keepFns[i])
+			continue
+		}
+		ret = filter(ret, keepFns[i])
+	}
+
+	return ret
+}
+
+func withPrefix(str string) func(string) bool {
+
+	return func(href string) bool {
+		if strings.HasPrefix(href, str) {
+			return true
+		} else {
+			return false
+		}
+	}
+
+}
+
+func withNumber(number int) func(string) bool {
+	return func(href string) bool {
+		return strings.Contains(href, strconv.Itoa(number))
+
+	}
 }
