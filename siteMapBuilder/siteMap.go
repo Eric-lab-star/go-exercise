@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/Eric-lab-star/go-exercise/link"
@@ -14,13 +13,39 @@ import (
 
 func main() {
 	urlFlag := flag.String("url", "https://gophercises.com", "url of the website you want to build")
+	maxDepth := flag.Int("depth", 5, "the maximum number of links deep to traverse")
 	flag.Parse()
+	links := bfs(*urlFlag, *maxDepth)
 
-	hrefs := get(*urlFlag)
-
-	for _, href := range hrefs {
-		fmt.Println(href)
+	for _, link := range links {
+		fmt.Println(link)
 	}
+}
+
+func bfs(url string, maxdeep int) []string {
+	seen := make(map[string]struct{})
+	var q map[string]struct{}
+	nq := map[string]struct{}{
+		url: {},
+	}
+	for i := 0; i < maxdeep; i++ {
+		q, nq = nq, make(map[string]struct{})
+		for l := range q {
+			if _, ok := seen[l]; ok {
+				continue
+			}
+			seen[l] = struct{}{}
+			for _, link := range get(l) {
+				nq[link] = struct{}{}
+			}
+		}
+	}
+	var ret []string
+	for link := range seen {
+		ret = append(ret, link)
+	}
+	return ret
+
 }
 
 // get makes http.Get request and return slice of href string
@@ -37,7 +62,7 @@ func get(urlFlag string) []string {
 		Host:   reqURL.Host,
 	}
 
-	return filterAll(hrefs(res.Body, baseURL), withNumber(100), withNumber(90))
+	return filterAll(hrefs(res.Body, baseURL), withPrefix(baseURL.String()))
 }
 
 // hrefs parse response body and return href
@@ -93,11 +118,4 @@ func withPrefix(str string) func(string) bool {
 		}
 	}
 
-}
-
-func withNumber(number int) func(string) bool {
-	return func(href string) bool {
-		return strings.Contains(href, strconv.Itoa(number))
-
-	}
 }
