@@ -5,8 +5,10 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
+	"github.com/Eric-lab-star/task/db"
 	"github.com/spf13/cobra"
 )
 
@@ -25,6 +27,25 @@ var doCmd = &cobra.Command{
 			}
 		}
 		fmt.Println(ids)
+		tasks, err := db.AllTasks()
+		for _, id := range ids {
+			if id <= 0 || id > len(tasks) {
+				fmt.Println("Invalid task number: ", id)
+				continue
+			}
+
+			task := tasks[id-1]
+			err := db.DeleteTask(task.ID)
+			if err != nil {
+				fmt.Printf("Faild to mark \"%d\" as completed. Error: %v\n", id, err)
+			} else {
+				fmt.Printf("Marked \"%d\" as completed\n", id)
+			}
+		}
+		if err != nil {
+			fmt.Printf("something went wrong")
+			os.Exit(1)
+		}
 	},
 }
 
