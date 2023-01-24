@@ -1,25 +1,48 @@
 package main
 
 import (
+	"encoding/xml"
 	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/Eric-lab-star/go-exercise/link"
 )
+
+type loc struct {
+	Value string `xml:"loc"`
+}
+
+const xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9"
+
+type urlset struct {
+	Urls  []loc  `xml:"url"`
+	Xmlns string `xml:"xmlns,attr"`
+}
 
 func main() {
 	urlFlag := flag.String("url", "https://gophercises.com", "url of the website you want to build")
 	maxDepth := flag.Int("depth", 5, "the maximum number of links deep to traverse")
 	flag.Parse()
 	links := bfs(*urlFlag, *maxDepth)
-
-	for _, link := range links {
-		fmt.Println(link)
+	toXml := urlset{
+		Xmlns: xmlns,
 	}
+	for _, link := range links {
+		toXml.Urls = append(toXml.Urls, loc{link})
+	}
+	fmt.Print(xml.Header)
+	enc := xml.NewEncoder(os.Stdout)
+	enc.Indent("", "  ")
+	if err := enc.Encode(toXml); err != nil {
+		panic(err)
+	}
+	fmt.Println()
+
 }
 
 func bfs(url string, maxdeep int) []string {
