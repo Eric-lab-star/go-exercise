@@ -22,8 +22,10 @@ func main() {
 
 	must(err)
 	defer db.Close()
-	must(db.Ping())
-
+	createPhoneNumbersTable(db)
+	id, err := insertPhonNumbers(db)
+	must(err)
+	fmt.Println("id: ", id)
 }
 
 func must(err error) {
@@ -33,21 +35,28 @@ func must(err error) {
 	}
 }
 
-// func resetDB(db *sql.DB, name string) error {
-// 	_, err := db.Exec("DROP DATABASE IF EXISTS " + name)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return createDB(db, name)
-// }
+func insertPhonNumbers(db *sql.DB) (int, error) {
+	statement := `INSERT INTO phone_numbers(value) VALUES($1) RETURNING id`
+	row := db.QueryRow(statement, "1234567890")
+	var id int
+	err := row.Scan(&id)
+	if err != nil {
+		return -1, err
+	}
+	return id, nil
 
-// func createDB(db *sql.DB, name string) error {
-// 	_, err := db.Exec("CREATE DATABASE " + name)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+}
+
+func createPhoneNumbersTable(db *sql.DB) {
+	statement := `
+		CREATE TABLE IF NOT EXISTS phone_numbers(
+			id SERIAL,
+			value VARCHAR(255)
+		)
+	`
+	_, err := db.Exec(statement)
+	must(err)
+}
 
 func normalize(phone string) string {
 	re := regexp.MustCompile("[^0-9]")
