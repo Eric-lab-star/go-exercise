@@ -45,7 +45,6 @@ func main() {
 			p, err := findPhoneNumber(db, n)
 			must(err)
 			if p != nil {
-
 				err := deletePhoneNumber(db, p.id)
 				must(err)
 			} else {
