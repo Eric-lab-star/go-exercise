@@ -56,7 +56,7 @@ func (c Card) String() string {
 	return fmt.Sprintf("%s of %ss", c.Rank.String(), c.Suit.String())
 }
 
-func New(opt ...func([]Card) []Card) []Card {
+func New(opt ...optFunc) []Card {
 	var cards []Card
 	for _, suit := range Suits {
 		for rank := MinRank; rank <= MaxRank; rank++ {
@@ -66,12 +66,22 @@ func New(opt ...func([]Card) []Card) []Card {
 	return cards
 }
 
+type optFunc func(cards []Card) []Card
+type LessFunc func(i, j int) bool
+
 func DefaultSort(cards []Card) []Card {
 	sort.Slice(cards, Less(cards))
 	return cards
 }
 
-func Less(cards []Card) func(i, j int) bool {
+func Sort(less func(cards []Card) LessFunc) optFunc {
+	return func(cards []Card) []Card {
+		sort.Slice(cards, less(cards))
+		return cards
+	}
+}
+
+func Less(cards []Card) LessFunc {
 	return func(i, j int) bool {
 		return absCard(cards[i]) < absCard(cards[j])
 	}
