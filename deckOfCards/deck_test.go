@@ -23,3 +23,30 @@ func TestNew(t *testing.T) {
 	}
 
 }
+
+func TestDefaultSort(t *testing.T) {
+	input := []Card{
+		{Suit: Club, Rank: Queen},
+		{Suit: Spade, Rank: Six},
+		{Suit: Club, Rank: Five},
+		{Suit: Spade, Rank: Five},
+		{Suit: Club, Rank: Six},
+		{Suit: Spade, Rank: Queen},
+	}
+	want := []Card{
+		{Suit: Spade, Rank: Five},
+		{Suit: Spade, Rank: Six},
+		{Suit: Spade, Rank: Queen},
+		{Suit: Club, Rank: Five},
+		{Suit: Club, Rank: Six},
+		{Suit: Club, Rank: Queen},
+	}
+	got := DefaultSort(input)
+	for i, v := range got {
+		if got[i].Suit != want[i].Suit {
+			t.Errorf("got: %v want: %v \n", v, want[i])
+		} else if got[i].Rank != want[i].Rank {
+			t.Errorf("got: %v want: %v \n", v, want[i])
+		}
+	}
+}

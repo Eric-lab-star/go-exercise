@@ -3,7 +3,10 @@
 
 package deck
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 type Suit uint8
 
@@ -53,7 +56,7 @@ func (c Card) String() string {
 	return fmt.Sprintf("%s of %ss", c.Rank.String(), c.Suit.String())
 }
 
-func New() []Card {
+func New(opt ...func([]Card) []Card) []Card {
 	var cards []Card
 	for _, suit := range Suits {
 		for rank := MinRank; rank <= MaxRank; rank++ {
@@ -61,4 +64,19 @@ func New() []Card {
 		}
 	}
 	return cards
+}
+
+func DefaultSort(cards []Card) []Card {
+	sort.Slice(cards, Less(cards))
+	return cards
+}
+
+func Less(cards []Card) func(i, j int) bool {
+	return func(i, j int) bool {
+		return absCard(cards[i]) < absCard(cards[j])
+	}
+}
+
+func absCard(c Card) int {
+	return int(c.Suit)*int(MaxRank) + int(c.Rank)
 }
