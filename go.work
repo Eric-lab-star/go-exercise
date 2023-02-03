@@ -6,4 +6,6 @@ use (
 	./siteMapBuilder
 	./phoneNumber
 	./cards
+	./blackJack
+
 )
