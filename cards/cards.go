@@ -67,6 +67,13 @@ func New(opts ...func([]Card) []Card) []Card {
 	return cards
 }
 
+func Sort(less func(cards []Card) func(i, j int) bool) func(cards []Card) []Card {
+	return func(cards []Card) []Card {
+		sort.Slice(cards, less(cards))
+		return cards
+	}
+}
+
 func DefaultSort(cards []Card) []Card {
 	sort.Slice(cards, Less(cards))
 	return cards
