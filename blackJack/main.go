@@ -114,5 +114,8 @@ func clone(gs GameState) GameState {
 		Player: make(Hand, len(gs.Player)),
 		Dealer: make(Hand, len(gs.Dealer)),
 	}
+	copy(ret.Deck, gs.Deck)
+	copy(ret.Player, gs.Player)
+	copy(ret.Dealer, gs.Dealer)
 	return ret
 }
