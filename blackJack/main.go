@@ -106,3 +106,13 @@ type GameState struct {
 	Player Hand
 	Dealer Hand
 }
+
+func clone(gs GameState) GameState {
+	ret := GameState{
+		Deck:   make([]deck.Card, len(gs.Deck)),
+		Turn:   gs.Turn,
+		Player: make(Hand, len(gs.Player)),
+		Dealer: make(Hand, len(gs.Dealer)),
+	}
+	return ret
+}
